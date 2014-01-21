@@ -1,0 +1,14 @@
+# Plugin by StormDev
+# Made for the Bukkit Minecraft Server API
+
+name: UltimatePluginUpdater
+main: net.stormdev.bukkitmods.ultimatepluginupdater.main.main
+version: 2
+commands:
+   upu:
+        aliases: [ultimatepluginupdater]
+        description: This shows all registered plugins
+        usage: /<command> [(page)] [Check] [Update <Plugin>] [Unregister <Plugin>] [Register <Plugin>] [Install <Plugin>]
+        permission: upu.upu
+        permission-message: You don't have access to this command
+        default: op
