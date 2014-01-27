@@ -220,6 +220,8 @@ public class UpdateableManager {
 							needReload = true;
 						 }
 					} catch (Exception e) {
+						e.printStackTrace();
+						main.logger.info(main.colors.getError()+"Update failed for: "+updateable.getPluginName()+"!");
 					}
 			}
 			else{
@@ -396,6 +398,8 @@ public class UpdateableManager {
 						needReload = true;
 					 }
 				} catch (Exception e) {
+					e.printStackTrace();
+					main.logger.info(main.colors.getError()+"Update failed for: "+updateable.getPluginName()+"!");
 				}
     			
     		}

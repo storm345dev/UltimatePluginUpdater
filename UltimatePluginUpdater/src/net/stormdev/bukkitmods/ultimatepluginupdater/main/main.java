@@ -12,7 +12,6 @@ import java.util.HashMap;
 import net.stormdev.bukkitmods.ultimatepluginupdater.utils.FileGetter;
 import net.stormdev.bukkitmods.ultimatepluginupdater.utils.PluginRegistration;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -89,7 +88,7 @@ public class main extends JavaPlugin implements CommandExecutor {
         } catch(Exception e){
         }
 		saveConfig();
-		this.strictVersioning = config.getBoolean("general.updater.strictVersioning");
+		strictVersioning = config.getBoolean("general.updater.strictVersioning");
 		//Load the colour scheme
 		colors = new Colors(config.getString("colorScheme.success"),
 				config.getString("colorScheme.error"),
@@ -160,6 +159,7 @@ public class main extends JavaPlugin implements CommandExecutor {
 		logger.info("UltimatePluginUpdater has been disabled!");
 	}
 	
+	@SuppressWarnings("unused")
 	private void copy(InputStream in, File file) {
 		try {
 			OutputStream out = new FileOutputStream(file);

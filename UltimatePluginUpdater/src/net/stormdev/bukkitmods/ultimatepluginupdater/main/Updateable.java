@@ -1,7 +1,6 @@
 package net.stormdev.bukkitmods.ultimatepluginupdater.main;
 
 import java.io.Serializable;
-import java.net.URL;
 
 public class Updateable implements Serializable {
 	private static final long serialVersionUID = 1906965187595531169L;
