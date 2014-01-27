@@ -91,6 +91,10 @@ public class FileGetter {
     			UpdateableManager.save();
     			return null;
             }
+            try {
+				conn2.getInputStream().close();
+			} catch (Exception e) {
+			}
         }
         long projectId = id;
         String fileReq = "https://api.curseforge.com/servermods/files?projectIds="+projectId;
@@ -141,6 +145,10 @@ public class FileGetter {
 			return null;
         }
         url = new URL(downloadUrl);
+        try {
+			conn3.getInputStream().close();
+		} catch (Exception e) {
+		}
 		return url;
 	}
 	
