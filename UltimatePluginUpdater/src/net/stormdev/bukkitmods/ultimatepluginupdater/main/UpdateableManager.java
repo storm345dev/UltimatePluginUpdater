@@ -421,7 +421,9 @@ public class UpdateableManager {
     			@SuppressWarnings("unchecked")
 				ArrayList<Updateable> ups = (ArrayList<Updateable>) updateables.clone();
     			for(Updateable updateable:ups){
-    				System.out.println("Checked ("+checked+"/"+ups.size()+") Plugins...");
+    				if(main.config.getBoolean("general.updater.logChecks")){
+    					System.out.println("Checked ("+checked+"/"+ups.size()+") Plugins...");
+    				}
     				checkAndRunUpdate(updateable, false);
     			}
     			//Finished checking all plugins for updates
