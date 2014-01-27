@@ -422,7 +422,7 @@ public class UpdateableManager {
 				ArrayList<Updateable> ups = (ArrayList<Updateable>) updateables.clone();
     			for(Updateable updateable:ups){
     				if(main.config.getBoolean("general.updater.logChecks")){
-    					System.out.println("Checked ("+checked+"/"+ups.size()+") Plugins...");
+    					System.out.println("Checking plugin ("+(checked+1)+"/"+ups.size()+")...");
     				}
     				checkAndRunUpdate(updateable, false);
     			}
