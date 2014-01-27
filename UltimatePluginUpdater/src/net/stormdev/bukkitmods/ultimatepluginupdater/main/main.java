@@ -5,15 +5,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.regex.Pattern;
 
 import net.stormdev.bukkitmods.ultimatepluginupdater.utils.FileGetter;
 import net.stormdev.bukkitmods.ultimatepluginupdater.utils.PluginRegistration;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -23,6 +22,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 public class main extends JavaPlugin implements CommandExecutor {
@@ -33,6 +33,8 @@ public class main extends JavaPlugin implements CommandExecutor {
 	public static CustomLogger logger = null;
 	public static BukkitTask checker = null;
 	public Boolean updaterEnabled = true;
+	public ArrayList<String> configuredPlugins = new ArrayList<String>();
+	public static boolean strictVersioning = false;
 	public HashMap<String, PluginRegistration> pluginRegistrations = new HashMap<String, PluginRegistration>();
 	@SuppressWarnings("unchecked")
 	public void onEnable(){
@@ -62,6 +64,9 @@ public class main extends JavaPlugin implements CommandExecutor {
         	if (!config.contains("general.updater.logChecks")) {
 				config.set("general.updater.logChecks", false);
         	}
+        	if (!config.contains("general.updater.strictVersioning")) {
+				config.set("general.updater.strictVersioning", false);
+        	}
         	else{ //Value already set - NOT first run
         	this.updaterEnabled = config.getBoolean("general.updater.enable");
         	}
@@ -84,6 +89,7 @@ public class main extends JavaPlugin implements CommandExecutor {
         } catch(Exception e){
         }
 		saveConfig();
+		this.strictVersioning = config.getBoolean("general.updater.strictVersioning");
 		//Load the colour scheme
 		colors = new Colors(config.getString("colorScheme.success"),
 				config.getString("colorScheme.error"),
@@ -110,8 +116,7 @@ public class main extends JavaPlugin implements CommandExecutor {
 		for(Object k:getDescription().getCommands().keySet()){
 			getCommand((String) k).setExecutor(this);
 		}
-		ArrayList<String> configuredPlugins = new ArrayList<String>();
-		File cfgPlugins = new File(getDataFolder().getAbsolutePath() + File.separator
+		final File cfgPlugins = new File(getDataFolder().getAbsolutePath() + File.separator
 				+ "cfgPlugins.data"); //Tells the plugin what local files have already been auto-configured
 		Boolean save = false;
 		if (cfgPlugins.exists() == false
@@ -126,13 +131,22 @@ public class main extends JavaPlugin implements CommandExecutor {
 		else{
 			configuredPlugins = (ArrayList<String>) ObjectLoader.load(cfgPlugins);
 		}
-		for(Plugin pl:getServer().getPluginManager().getPlugins()){
-			if(!configuredPlugins.contains(pl.getName().toLowerCase())){
-				newPlugin(pl);
-				configuredPlugins.add(pl.getName().toLowerCase());
-				save = true;
-			}
-		}
+		getServer().getScheduler().runTaskAsynchronously(this, new BukkitRunnable(){
+
+			public void run() {
+				boolean save = false;
+				for(Plugin pl:getServer().getPluginManager().getPlugins()){
+					if(!configuredPlugins.contains(pl.getName().toLowerCase())){
+						newPlugin(pl);
+						configuredPlugins.add(pl.getName().toLowerCase());
+						save = true;
+					}
+				}
+				if(save){
+				    ObjectLoader.save(configuredPlugins, cfgPlugins);	
+				}
+				return;
+			}});
 		if(save){
 		    ObjectLoader.save(configuredPlugins, cfgPlugins);	
 		}

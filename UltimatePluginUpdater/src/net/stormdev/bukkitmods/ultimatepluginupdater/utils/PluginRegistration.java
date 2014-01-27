@@ -2,10 +2,7 @@ package net.stormdev.bukkitmods.ultimatepluginupdater.utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.regex.Pattern;
 
 import net.stormdev.bukkitmods.ultimatepluginupdater.main.ObjectLoader;
 import net.stormdev.bukkitmods.ultimatepluginupdater.main.Updateable;
