@@ -319,9 +319,6 @@ public class main extends JavaPlugin implements CommandExecutor {
 			UpdateableManager.registerUpdateable(pluginName, fileName, slug); //Let the plugin know to update it
 			main.logger.info("Found and registered "+pluginName);
 		}
-		else{
-			main.logger.info("Couldn't find "+pluginName+" on bukkit.org, will have to be registered manually");
-		}
 		return;
 	}
 }
