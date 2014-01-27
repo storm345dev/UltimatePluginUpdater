@@ -70,10 +70,9 @@ public class UpdateableManager {
 			try {
 				 last = FileGetter.getLatestPluginFileURL(updateable);
 			} catch (Exception e) {
-				e.printStackTrace();
 				main.logger.info("plugin: "+updateable.getPluginName());
 				main.logger.info("slug: "+updateable.getSlug());
-				main.logger.info("Can't connect to bukkit.org, invalid plugin url or bukkit.org changed - Update this plugin");
+				main.logger.info("Can't connect to dev.bukkit.org, Bukkit overloaded, or plugin removed?");
 				return false;
 			}
 			String old = last.toExternalForm().toLowerCase();
@@ -136,10 +135,6 @@ public class UpdateableManager {
 			}
 			main.logger.info("Saving update to "+file.getAbsolutePath());
     		}
-			updateables.remove(updateable);
-			String oldUrl = update.toExternalForm().toLowerCase();
-			updateable.setOldUrl(oldUrl);
-			updateables.add(updateable);
 			if(reload){
 				save();
 			}
@@ -151,6 +146,7 @@ public class UpdateableManager {
 						System.out.println("Started updating "+name+"...");
 						System.out.println("Length: "+length+"KB");
 						//URLConnection connection = update.openConnection();
+						/*
 						InputStream inUp = new BufferedInputStream(update.openStream());
 						 ByteArrayOutputStream outUp = new ByteArrayOutputStream();
 						 byte[] buf = new byte[1024]; //1024 bytes = 1KB
@@ -177,13 +173,43 @@ public class UpdateableManager {
 						 }
 						 outUp.close();
 						 inUp.close();
+						 */
+						 InputStream inUp = new BufferedInputStream(update.openStream());
+						 ByteArrayOutputStream outUp = new ByteArrayOutputStream();
+						 byte[] buf = new byte[1024]; //1024 bytes = 1KB
+						 int n = 0;
+						 int comp = -1; 
+						 int prevPercent = -1;
+						 while (-1!=(n=inUp.read(buf)))
+						 {
+							 comp = comp + 1;
+							 int percent = 0;
+							 if(comp >= 0 ){
+								//progress must be in %
+								 percent = (int) ((Double.parseDouble(""+comp)/Double.parseDouble(""+length))*100);
+							 }
+							if(percent % 20 == 0){
+							if(percent != prevPercent){
+							System.out.println(name+"(" + percent + "%)");
+							prevPercent = percent;
+							}
+							}
+						    outUp.write(buf, 0, n);
+						 }
+						 outUp.close();
+						 inUp.close();
+						 System.out.println("Downloaded content! Saving...");
 						 byte[] responseUp = outUp.toByteArray();
 						 file.getParentFile().mkdirs();
 						 FileOutputStream fos = new FileOutputStream(file);
 						     fos.write(responseUp);
 						     fos.flush();
 						     fos.close();
-						 System.out.println("Downloaded content!");
+						 System.out.println("Update complete!");
+						 updateables.remove(updateable);
+							String oldUrl = update.toExternalForm().toLowerCase();
+							updateable.setOldUrl(oldUrl);
+							updateables.add(updateable);
 						 //done;
 						 if(reload){
 							toReload = false;
@@ -239,6 +265,10 @@ public class UpdateableManager {
 					     fos.flush();
 					     fos.close();
 					 System.out.println("Downloaded zip!");
+					 updateables.remove(updateable);
+						String oldUrl = update.toExternalForm().toLowerCase();
+						updateable.setOldUrl(oldUrl);
+						updateables.add(updateable);
 					 ZipInputStream zis = 
 					    		new ZipInputStream(new FileInputStream(tmp));
 					    	//get the zipped file list entry
