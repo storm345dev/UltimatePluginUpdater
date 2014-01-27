@@ -17,6 +17,7 @@ import java.util.zip.ZipInputStream;
 
 import net.stormdev.bukkitmods.ultimatepluginupdater.utils.FileGetter;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 public class UpdateableManager {
@@ -463,11 +464,15 @@ public class UpdateableManager {
     	return;
     }
     public static void reload(){
-    	needReload = false;
-    	main.plugin.getServer().getScheduler().runTask(main.plugin, new Runnable(){
+    	try {
+			needReload = false;
+		} catch (Exception e) {
+		}
+    	Bukkit.getServer().getScheduler().runTask(main.plugin, new Runnable(){
 
 			public void run() {
 				main.plugin.getServer().reload();
+				return;
 			}});
     	return;
     }
