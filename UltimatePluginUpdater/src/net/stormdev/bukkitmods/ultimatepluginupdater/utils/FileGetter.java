@@ -100,7 +100,7 @@ public class FileGetter {
 		try {
 			reader3 = new BufferedReader(new InputStreamReader(conn3.getInputStream()));
 		} catch (IOException e) {
-			main.logger.info(ChatColor.RED+"Unable to connect to the CurseForge API! Is curseforge.com online or just busy?");
+			main.logger.info(ChatColor.RED+"Unable to connect to the CurseForge API! Is curseforge.com offline or just busy?");
 			return null;
 		}
         String response3 = reader3.readLine();
