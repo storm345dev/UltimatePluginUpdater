@@ -34,6 +34,7 @@ public class main extends JavaPlugin implements CommandExecutor {
 	public Boolean updaterEnabled = true;
 	public ArrayList<String> configuredPlugins = new ArrayList<String>();
 	public static boolean strictVersioning = false;
+	public static boolean useUpdateFolder = true;
 	public HashMap<String, PluginRegistration> pluginRegistrations = new HashMap<String, PluginRegistration>();
 	@SuppressWarnings("unchecked")
 	public void onEnable(){
@@ -67,7 +68,10 @@ public class main extends JavaPlugin implements CommandExecutor {
 				config.set("general.updater.strictVersioning", false);
         	}
         	else{ //Value already set - NOT first run
-        	this.updaterEnabled = config.getBoolean("general.updater.enable");
+            	this.updaterEnabled = config.getBoolean("general.updater.enable");
+            }
+        	if (!config.contains("general.updater.useUpdateFolder")) {
+				config.set("general.updater.useUpdateFolder", true);
         	}
         	//Setup the colour scheme
         	if (!config.contains("colorScheme.success")) {
@@ -88,6 +92,7 @@ public class main extends JavaPlugin implements CommandExecutor {
         } catch(Exception e){
         }
 		saveConfig();
+		useUpdateFolder = config.getBoolean("general.updater.useUpdateFolder");
 		strictVersioning = config.getBoolean("general.updater.strictVersioning");
 		//Load the colour scheme
 		colors = new Colors(config.getString("colorScheme.success"),

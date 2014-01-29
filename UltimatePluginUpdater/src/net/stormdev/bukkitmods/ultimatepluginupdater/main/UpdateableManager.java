@@ -116,7 +116,12 @@ public class UpdateableManager {
 			String path = "";
 			Boolean zip = false;
     		if(fileName.toLowerCase().endsWith(".jar")){
-    			path = main.plugin.getDataFolder().getParentFile().getAbsolutePath() + File.separator + updateable.getFileName() + ".jar";
+    			if(!main.useUpdateFolder){
+    				path = main.plugin.getDataFolder().getParentFile().getAbsolutePath() + File.separator + updateable.getFileName() + ".jar";
+    			}
+    			else{
+    				path = Bukkit.getUpdateFolderFile().getAbsolutePath() + File.separator + updateable.getFileName() + ".jar";
+    			}
     		}
     		else if(fileName.toLowerCase().endsWith(".zip")){
     		    zip = true;	
@@ -291,7 +296,12 @@ public class UpdateableManager {
 					           }
 					           if(plugin){
 					        	   //This is the file
-					        	   path = main.plugin.getDataFolder().getParentFile().getAbsolutePath() + File.separator + updateable.getFileName() + ".jar";
+					        	   if(!main.useUpdateFolder){
+					        		   path = main.plugin.getDataFolder().getParentFile().getAbsolutePath() + File.separator + updateable.getFileName() + ".jar";
+					        	   }
+					        	   else{
+					        		   path = Bukkit.getUpdateFolderFile().getAbsolutePath() + File.separator + updateable.getFileName() + ".jar";
+					        	   }
 					        	   File newFile = new File(path);
 					        	   newFile.getParentFile().mkdirs();
 					        	   if(!newFile.exists() || newFile.length() < 1){
