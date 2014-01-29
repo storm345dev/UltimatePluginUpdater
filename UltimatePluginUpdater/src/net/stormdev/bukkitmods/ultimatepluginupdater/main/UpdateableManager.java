@@ -467,13 +467,15 @@ public class UpdateableManager {
     		public void run(){
     			checked = 0;
     			runningUpdates = true;
-    			@SuppressWarnings("unchecked")
-				ArrayList<Updateable> ups = (ArrayList<Updateable>) updateables.clone();
-    			for(Updateable updateable:ups){
-    				if(main.config.getBoolean("general.updater.logChecks")){
-    					System.out.println("Checking plugin ("+(checked+1)+"/"+ups.size()+")...");
-    				}
-    				checkAndRunUpdate(updateable, false);
+    			while(runningUpdates){
+    				@SuppressWarnings("unchecked")
+    				ArrayList<Updateable> ups = (ArrayList<Updateable>) updateables.clone();
+        			for(Updateable updateable:ups){
+        				if(main.config.getBoolean("general.updater.logChecks")){
+        					System.out.println("Checking plugin ("+(checked+1)+"/"+ups.size()+")...");
+        				}
+        				checkAndRunUpdate(updateable, false);
+        			}
     			}
     			//Finished checking all plugins for updates
     			System.gc();
@@ -481,12 +483,12 @@ public class UpdateableManager {
     			return;
     		}
     	};
-    	updater.setDaemon(true); //Close when server dies
     	updater.start();
     	System.gc();
     	return;
     }
     public static void stopUpdater(){
+    	runningUpdates = false;
     	if(updater != null){
     		updater.interrupt(); //Attempt to stop it
     	}
