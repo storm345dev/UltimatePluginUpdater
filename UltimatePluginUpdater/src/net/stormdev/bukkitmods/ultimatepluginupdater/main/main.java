@@ -220,9 +220,8 @@ public class main extends JavaPlugin implements CommandExecutor {
 				    	return true;
 				    }
 				    else{
-				    	UpdateableManager.updateables.remove(updat);
 				    	updat.setOldUrl("NULL");
-				    	UpdateableManager.updateables.add(updat);
+				    	UpdateableManager.save(updat);
 				    	sender.sendMessage(main.colors.getSuccess()+"Plugin will be updated soon!");
 				    	return true;
 				    }
@@ -289,9 +288,8 @@ public class main extends JavaPlugin implements CommandExecutor {
 				}
 				else if(args[0].equalsIgnoreCase("updateall")){
 					for(Updateable up:new ArrayList<Updateable>(UpdateableManager.updateables)){
-						UpdateableManager.updateables.remove(up);
 						up.setOldUrl("NULL");
-						UpdateableManager.updateables.add(up);
+						UpdateableManager.save(up);
 					}
 					sender.sendMessage(main.colors.getSuccess()+"All plugins will be redownloaded soon!");
 					return true;

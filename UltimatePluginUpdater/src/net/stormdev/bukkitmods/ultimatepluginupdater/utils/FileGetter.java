@@ -4,7 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.net.URLConnection;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import net.stormdev.bukkitmods.ultimatepluginupdater.main.Updateable;
 import net.stormdev.bukkitmods.ultimatepluginupdater.main.UpdateableManager;
@@ -56,6 +57,26 @@ public class FileGetter {
         return id;
 	}
 	public static URL getLatestPluginFileURL(Updateable updateable) throws IOException {
+		int connectErrors = 0;
+		URL url = null;
+		
+		while(connectErrors < 5){
+			try {
+				url = getLatestPluginFileURLOnce(updateable);
+			} catch (IOException e) {
+				if(connectErrors >= 5){
+					throw e;
+				}
+				connectErrors++;
+				continue;
+			}
+			break;
+		}
+		
+		return url;
+	}
+	private static URL getLatestPluginFileURLOnce(Updateable updateable) throws IOException {
+		int connectErrors = 0;
 		URL url = null;
 		String pluginName = updateable.getSlug();
 		String a = pluginName.toLowerCase();
@@ -65,25 +86,79 @@ public class FileGetter {
 		String[] possible_slugs = new String[]{a,b,c,d};
 		String query = "https://api.curseforge.com/servermods/projects?search="+b; //Search without spaces
 		String query2 = "https://api.curseforge.com/servermods/projects?search="+c; //Search with dashes (If spaces nto found)
+		
 		URL search = new URL(query);
 		URL search2 = new URL(query2);
-		URLConnection conn = search.openConnection();
+		
+		String response = "";
 		String agent = "UltimatePluginUpdater/v"+main.plugin.getDescription().getVersion() + "(By StormDev)";
-		conn.addRequestProperty("User-Agent", agent);
-		final BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        String response = reader.readLine();
-        reader.close();
-        try {
-			conn.getInputStream().close(); //Close if connection kept alive
-		} catch (Exception e) {
+		
+		while(connectErrors < 5){
+			HttpsURLConnection conn;
+			try {
+				conn = (HttpsURLConnection) search.openConnection();
+			} catch (IOException e2) {
+				connectErrors++;
+				continue;
+			}
+			conn.addRequestProperty("User-Agent", agent);
+			conn.setConnectTimeout(1500);
+	        conn.setReadTimeout(1500);
+	        try {
+				conn.connect();
+			} catch (Exception e1) {
+				connectErrors++;
+				continue;
+			}
+			final BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+	        response = reader.readLine();
+	        reader.close();
+	        try {
+				conn.getInputStream().close(); //Close if connection kept alive
+			} catch (Exception e) {
+				connectErrors++;
+				continue;
+			}
+	        break;
 		}
+		
+		if(connectErrors >= 5 || response.length() < 1){
+			main.logger.info(ChatColor.RED+"Unable to connect to the CurseForge API! Is curseforge.com offline or just busy? ("+pluginName+")");
+			return null;
+		}
+		connectErrors = 0;
+		
         long id = search(possible_slugs, pluginName, response);
         if(id < 0){
-        	URLConnection conn2 = search2.openConnection();
-    		conn2.addRequestProperty("User-Agent", agent);
-    		final BufferedReader reader2 = new BufferedReader(new InputStreamReader(conn2.getInputStream()));
-            String response2 = reader2.readLine();
-            reader2.close();
+        	String response2 = "";
+        	HttpsURLConnection conn2 = null;
+        	
+        	while(connectErrors < 5){
+        		try {
+					conn2 = (HttpsURLConnection) search2.openConnection();
+				} catch (IOException e1) {
+					connectErrors++;
+					continue;
+				}
+        		conn2.addRequestProperty("User-Agent", agent);
+        		conn2.setConnectTimeout(1500);
+    	        conn2.setReadTimeout(1500);
+    	        try {
+					conn2.connect();
+					final BufferedReader reader2 = new BufferedReader(new InputStreamReader(conn2.getInputStream()));
+					response2 = reader2.readLine();
+					reader2.close();
+				} catch (Exception e) {
+					connectErrors++;
+					continue;
+				}
+                break;
+        	}
+        	if(connectErrors >= 5 || response2.length() < 1){
+        		main.logger.info(ChatColor.RED+"Unable to connect to the CurseForge API! Is curseforge.com offline or just busy? ("+pluginName+")");
+    			return null;
+        	}
+        	
             id = search(possible_slugs, pluginName, response2);
             if(id < 0){
             	main.logger.info("Unable to find "+pluginName+", unregistering..., please reregister manually!");
@@ -92,23 +167,47 @@ public class FileGetter {
     			return null;
             }
             try {
-				conn2.getInputStream().close();
+            	if(conn2 != null)
+            		conn2.getInputStream().close();
 			} catch (Exception e) {
 			}
         }
+        connectErrors = 0;
+        
         long projectId = id;
         String fileReq = "https://api.curseforge.com/servermods/files?projectIds="+projectId;
-        URLConnection conn3 = new URL(fileReq).openConnection();
-        conn3.addRequestProperty("User-Agent", agent);
-        BufferedReader reader3;
-		try {
-			reader3 = new BufferedReader(new InputStreamReader(conn3.getInputStream()));
-		} catch (IOException e) {
-			main.logger.info(ChatColor.RED+"Unable to connect to the CurseForge API! Is curseforge.com offline or just busy? ("+pluginName+")");
-			main.logger.info(ChatColor.RED+"Error: "+e.getMessage());
+        
+        String response3 = "";
+        HttpsURLConnection conn3 = null;
+        
+        while(connectErrors < 5){
+        	try {
+				conn3 = (HttpsURLConnection) new URL(fileReq).openConnection();
+			} catch (IOException e1) {
+				connectErrors++;
+    			continue;
+			}
+            conn3.addRequestProperty("User-Agent", agent);
+            conn3.setConnectTimeout(2000);
+            conn3.setReadTimeout(2000);
+            BufferedReader reader3;
+    		try {
+    			reader3 = new BufferedReader(new InputStreamReader(conn3.getInputStream()));
+    		} catch (IOException e) {
+    			connectErrors++;
+    			continue;
+    		}
+            response3 = reader3.readLine();
+            break;
+        }
+        
+        if(conn3 == null || connectErrors >= 5 || response3.length() < 1){
+        	main.logger.info(ChatColor.RED+"Unable to connect to the CurseForge API! Is curseforge.com offline or just busy? ("+pluginName+")");
 			return null;
-		}
-        String response3 = reader3.readLine();
+        }
+        
+        connectErrors = 0;
+        
         // Parse the array of files from the query's response
         JSONArray array = (JSONArray) JSONValue.parse(response3);
         String downloadUrl = "";
