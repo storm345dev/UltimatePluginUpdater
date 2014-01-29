@@ -26,6 +26,7 @@ public class UpdateableManager {
     private static Boolean needReload = false;
     private static Boolean runningUpdates = false;
     public static int checked = 0;
+    public static Thread updater = null;
 	public static void load(File softwareFolder){
 		updateables = new ArrayList<Updateable>();
     	folder = softwareFolder;
@@ -462,7 +463,7 @@ public class UpdateableManager {
 		}
     }
     public static void checkAll(){
-    	Thread updater = new Thread(){ //ONE updater thread which is NOT linked to the Bukkit scheduler
+    	updater = new Thread(){ //ONE updater thread which is NOT linked to the Bukkit scheduler
     		public void run(){
     			checked = 0;
     			runningUpdates = true;
@@ -480,9 +481,15 @@ public class UpdateableManager {
     			return;
     		}
     	};
+    	updater.setDaemon(true); //Close when server dies
     	updater.start();
     	System.gc();
     	return;
+    }
+    public static void stopUpdater(){
+    	if(updater != null){
+    		updater.interrupt(); //Attempt to stop it
+    	}
     }
     public static void checkDone(Boolean reloadit){
     	if(!needReload && reloadit){

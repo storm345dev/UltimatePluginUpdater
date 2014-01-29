@@ -161,6 +161,7 @@ public class main extends JavaPlugin implements CommandExecutor {
 	public void onDisable(){
 		checker.cancel();
 		checker = null;
+		UpdateableManager.stopUpdater();
 		logger.info("UltimatePluginUpdater has been disabled!");
 	}
 	
