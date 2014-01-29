@@ -3,7 +3,7 @@
 
 name: UltimatePluginUpdater
 main: net.stormdev.bukkitmods.ultimatepluginupdater.main.main
-version: 3
+version: 4
 commands:
    upu:
         aliases: [ultimatepluginupdater]
