@@ -287,6 +287,15 @@ public class main extends JavaPlugin implements CommandExecutor {
 					new PluginRegistration(pluginName, sender.getName(), sender, install);
 					return true;
 				}
+				else if(args[0].equalsIgnoreCase("updateall")){
+					for(Updateable up:new ArrayList<Updateable>(UpdateableManager.updateables)){
+						UpdateableManager.updateables.remove(up);
+						up.setOldUrl("NULL");
+						UpdateableManager.updateables.add(up);
+					}
+					sender.sendMessage(main.colors.getSuccess()+"All plugins will be redownloaded soon!");
+					return true;
+				}
 			}
 			@SuppressWarnings("unchecked")
 			ArrayList<Updateable> updats = (ArrayList<Updateable>) UpdateableManager.updateables.clone();
