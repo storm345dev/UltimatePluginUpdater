@@ -59,6 +59,20 @@ public class UpdateableManager {
     		}
     		ObjectLoader.save(updateable, file);
     	}
+    	return;
+    }
+    public static void save(Updateable updateable){
+    	String fileName = updateable.getFileName();
+		String path = folder.getAbsolutePath() + File.separator + fileName + ".updateable";
+		File file = new File(path);
+		if(!file.exists() || file.length() < 1){
+			try {
+				file.createNewFile();
+			} catch (IOException e) {
+			}
+		}
+		ObjectLoader.save(updateable, file);
+		return;
     }
     public static void registerUpdateable(String pluginName, String fileName, String slug){
     	Updateable updateable = new Updateable(pluginName, fileName, slug);
@@ -141,7 +155,7 @@ public class UpdateableManager {
 			}
 			main.logger.info("Saving update to "+file.getAbsolutePath());
     		}
-			if(reload){
+    		if(reload){
 				save();
 			}
 			    	 Boolean toReload = true;
@@ -212,10 +226,8 @@ public class UpdateableManager {
 						     fos.flush();
 						     fos.close();
 						 System.out.println("Update complete!");
-						 updateables.remove(updateable);
-							String oldUrl = update.toExternalForm().toLowerCase();
-							updateable.setOldUrl(oldUrl);
-							updateables.add(updateable);
+						 String oldUrl = update.toExternalForm().toLowerCase();
+						 updateable.setOldUrl(oldUrl);
 						 //done;
 						 if(reload){
 							toReload = false;
@@ -402,6 +414,7 @@ public class UpdateableManager {
 					 //done;
 					 if(reload){
 						toReload = false;
+						save(updateable);
 						reload();
 					 }
 					 else{
@@ -414,6 +427,7 @@ public class UpdateableManager {
 				}
     			
     		}
+					save(updateable);
 			    	checked++;
 			    	checkDone(toReload);
 			    	return;
