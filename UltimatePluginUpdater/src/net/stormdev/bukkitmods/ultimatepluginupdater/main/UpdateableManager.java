@@ -126,6 +126,9 @@ public class UpdateableManager {
 			if(log){
 				main.logger.info(main.colors.getInfo()+"Found new update for: "+updateable.getPluginName() + " - Downloading...");
 			}
+			
+			Thread.yield(); //Acceptable pause point
+			
 			String fileName = update.getFile();
 			int z = fileName.lastIndexOf("/");
 			fileName = fileName.substring(z+1);
@@ -160,7 +163,9 @@ public class UpdateableManager {
     		if(reload){
 				save();
 			}
-			    	 Boolean toReload = true;
+			Boolean toReload = true;    	 
+			
+			Thread.yield(); //Acceptable pause point
 			if(!zip){
 				boolean success = false;
 				int downloadAttempts = 0;
@@ -475,6 +480,7 @@ public class UpdateableManager {
         					System.out.println("Checking plugin ("+(checked+1)+"/"+ups.size()+")...");
         				}
         				checkAndRunUpdate(updateable, false);
+        				yield(); //Let other threads have a go
         			}
     			}
     			//Finished checking all plugins for updates
