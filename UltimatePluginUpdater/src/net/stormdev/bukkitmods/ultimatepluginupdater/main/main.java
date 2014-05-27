@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import net.stormdev.bukkitmods.ultimatepluginupdater.utils.FileGetter;
 import net.stormdev.bukkitmods.ultimatepluginupdater.utils.PluginRegistration;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -184,7 +186,7 @@ public class main extends JavaPlugin implements CommandExecutor {
 	public static String colorise(String prefix) {
 		 return ChatColor.translateAlternateColorCodes('&', prefix);
 	}
-	public boolean onCommand(CommandSender sender, Command cmd, String alias,
+	public boolean onCommand(final CommandSender sender, Command cmd, String alias,
 			String[] args) {
 		if(cmd.getName().equalsIgnoreCase("upu")){
 			if(args.length > 0){
@@ -294,6 +296,57 @@ public class main extends JavaPlugin implements CommandExecutor {
 					}
 					sender.sendMessage(main.colors.getSuccess()+"All plugins will be redownloaded soon!");
 					return true;
+				}
+				else if(args[0].equalsIgnoreCase("downloadupdate")){ // /upu downloadupdate <URL> <JARFILE.jar>
+					if(sender instanceof Player){
+						if(!((Player)sender).isOp()){
+							sender.sendMessage(ChatColor.RED+"ONLY Ops can use this command!");
+							return true;
+						}
+					}
+					else {
+						if(!sender.equals(Bukkit.getConsoleSender())){
+							//No command blocks...
+							return true;
+						}
+					}
+					
+					if(args.length < 3){
+						return false;
+					}
+					
+					String url = args[1];
+					String filename = args[2];
+					if(!filename.contains(".")){
+						sender.sendMessage(ChatColor.RED+"Destination MUST contain '.', eg. plugins/name.jar");
+						return true;
+					}
+					final File dest = new File(filename);
+					
+					final URL URL;
+					try {
+						URL = new URL(url);
+					} catch (MalformedURLException e) {
+						sender.sendMessage(ChatColor.RED+"INVALID url!");
+						return true;
+					}
+					
+					sender.sendMessage(ChatColor.GREEN+"Started update proceedure!");
+					
+					new Thread(){
+						@Override
+						public void run(){
+							if(UpdateableManager.doDownload(URL, dest)){
+								sender.sendMessage(ChatColor.GREEN+"Download success!");
+							}
+							else {
+								sender.sendMessage(ChatColor.RED+"Download failed!");
+							}
+							
+							return;
+						}
+						
+					}.start();
 				}
 			}
 			@SuppressWarnings("unchecked")

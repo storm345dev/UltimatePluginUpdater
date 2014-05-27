@@ -105,6 +105,86 @@ public class UpdateableManager {
     	//No update
     	return null;
     }
+    public static boolean doDownload(URL update, File file){
+    	boolean success = false;
+		int downloadAttempts = 0;
+		
+		while(downloadAttempts < 5){
+	    	try {
+				double length = (update.openConnection().getContentLength()/1024)+1; //In KB
+				System.out.println("Started download from "+update.toExternalForm()+"...");
+				System.out.println("Length: "+length+"KB");
+				//URLConnection connection = update.openConnection();
+				/*
+				InputStream inUp = new BufferedInputStream(update.openStream());
+				 ByteArrayOutputStream outUp = new ByteArrayOutputStream();
+				 byte[] buf = new byte[1024]; //1024 bytes = 1KB
+				 int n = 0;
+				 int comp = -1; 
+				 int off = 0;
+				 int prevPercent = -1;
+				 while (-1!=(n=inUp.read(buf)))
+				 {
+					 comp = comp + 1;
+					 int percent = 0;
+					 if(comp >= 0 ){
+						//progress must be in %
+						 percent = (int) ((Double.parseDouble(""+comp)/Double.parseDouble(""+length))*100);
+					 }
+					if(percent % 20 == 0){
+					if(percent != prevPercent){
+					System.out.println(name+"(" + percent + "%)");
+					prevPercent = percent;
+					}
+					}
+				    outUp.write(buf, off, n);
+				    off = off+n;
+				 }
+				 outUp.close();
+				 inUp.close();
+				 */
+				 InputStream inUp = new BufferedInputStream(update.openStream());
+				 ByteArrayOutputStream outUp = new ByteArrayOutputStream();
+				 byte[] buf = new byte[1024]; //1024 bytes = 1KB
+				 int n = 0;
+				 int comp = -1; 
+				 int prevPercent = -1;
+				 while (-1!=(n=inUp.read(buf)))
+				 {
+					 comp = comp + 1;
+					 int percent = 0;
+					 if(comp >= 0 ){
+						//progress must be in %
+						 percent = (int) ((Double.parseDouble(""+comp)/Double.parseDouble(""+length))*100);
+					 }
+					if(percent % 20 == 0){
+					if(percent != prevPercent){
+					System.out.println("URL-Download:"+"(" + percent + "%)");
+					prevPercent = percent;
+					}
+					}
+				    outUp.write(buf, 0, n);
+				 }
+				 outUp.close();
+				 inUp.close();
+				 System.out.println("Downloaded content! Saving...");
+				 byte[] responseUp = outUp.toByteArray();
+				 file.getParentFile().mkdirs();
+				 FileOutputStream fos = new FileOutputStream(file);
+				     fos.write(responseUp);
+				     fos.flush();
+				     fos.close();
+				 System.out.println("Update complete!");
+				 //done;
+			} catch (IOException e) {
+				downloadAttempts++;
+				continue;
+			}
+	    	success = true;
+	    	break;
+		}
+		return success;
+    }
     public static void checkAndRunUpdate(final Updateable updateable, final Boolean reload){
     	try {
     		Boolean log = main.config.getBoolean("general.updater.logChecks");
