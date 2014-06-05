@@ -9,7 +9,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
+import net.stormdev.bukkitmods.ultimatepluginupdater.generalDownload.URLUpdateHandler;
+import net.stormdev.bukkitmods.ultimatepluginupdater.generalDownload.URLUpdateable;
 import net.stormdev.bukkitmods.ultimatepluginupdater.utils.FileGetter;
 import net.stormdev.bukkitmods.ultimatepluginupdater.utils.PluginRegistration;
 
@@ -38,6 +41,9 @@ public class main extends JavaPlugin implements CommandExecutor {
 	public static boolean strictVersioning = false;
 	public static boolean useUpdateFolder = true;
 	public HashMap<String, PluginRegistration> pluginRegistrations = new HashMap<String, PluginRegistration>();
+	
+	public URLUpdateHandler urlUpdater;
+	
 	@SuppressWarnings("unchecked")
 	public void onEnable(){
 		plugin = this;
@@ -115,6 +121,7 @@ public class main extends JavaPlugin implements CommandExecutor {
 				public void run() {
 					main.logger.info("Starting plugin updater...");
 					UpdateableManager.checkAll();
+					urlUpdater.callCheck();
 					main.logger.info("Plugin updater started!");
 					return;
 				}}, 20l, 36000l);
@@ -156,6 +163,9 @@ public class main extends JavaPlugin implements CommandExecutor {
 		if(save){
 		    ObjectLoader.save(configuredPlugins, cfgPlugins);	
 		}
+		
+		urlUpdater = new URLUpdateHandler();
+		
 		getServer().getPluginManager().registerEvents(new UPUEventListener(), this);
 		logger.info("UltimatePluginUpdater v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}
@@ -348,6 +358,9 @@ public class main extends JavaPlugin implements CommandExecutor {
 						
 					}.start();
 				}
+				else {
+					return false;
+				}
 			}
 			@SuppressWarnings("unchecked")
 			ArrayList<Updateable> updats = (ArrayList<Updateable>) UpdateableManager.updateables.clone();
@@ -362,6 +375,57 @@ public class main extends JavaPlugin implements CommandExecutor {
 			sender.sendMessage(main.colors.getTitle()+"My Registered Plugins: ("+updats.size()+")");
 			sender.sendMessage(main.colors.getInfo()+names);
 			return true;
+		}
+		else if(cmd.getName().equalsIgnoreCase("upurl")){
+			//TODO
+			if(args.length < 1){
+				List<URLUpdateable> updats = (List<URLUpdateable>) urlUpdater.getAll();
+				String names = "";
+				for(URLUpdateable u:updats){	
+					String name = u.getRemoteURL();
+					if(names != ""){
+					names = names + ", ";
+					}
+					names = names + name;
+				}
+				sender.sendMessage(main.colors.getTitle()+"My Registered URLs: ("+updats.size()+")");
+				sender.sendMessage(main.colors.getInfo()+names);
+			}
+			else if(args.length > 0){
+				if(args[0].equalsIgnoreCase("check")){
+					urlUpdater.callCheck();
+					sender.sendMessage(ChatColor.GREEN+"Started update checks!");
+					return true;
+				}
+				else if(args[0].equalsIgnoreCase("unregister")){
+					if(args.length < 2){
+						return false;
+					}
+					String url = args[1];
+					if(urlUpdater.unregister(url)){
+						sender.sendMessage(ChatColor.GREEN+"Successfully unregistered!");
+						return true;
+					}
+					else {
+						sender.sendMessage(ChatColor.RED+"Failed to unregister!");
+					}
+					return true;
+				}
+				else if(args[0].equalsIgnoreCase("register")){
+					if(args.length < 3){
+						return false;
+					}
+					String url = args[1];
+					StringBuilder filePath = new StringBuilder(args[2]);
+					for(int i = 3;i<args.length;i++){
+						filePath.append(" ").append(args[i]);
+					}
+					
+					String path = filePath.toString();
+					
+					
+				}
+			}
 		}
 		return false;
 	}
