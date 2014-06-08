@@ -377,7 +377,6 @@ public class main extends JavaPlugin implements CommandExecutor {
 			return true;
 		}
 		else if(cmd.getName().equalsIgnoreCase("upurl")){
-			//TODO
 			if(args.length < 1){
 				List<URLUpdateable> updats = (List<URLUpdateable>) urlUpdater.getAll();
 				String names = "";
@@ -390,6 +389,7 @@ public class main extends JavaPlugin implements CommandExecutor {
 				}
 				sender.sendMessage(main.colors.getTitle()+"My Registered URLs: ("+updats.size()+")");
 				sender.sendMessage(main.colors.getInfo()+names);
+				return true;
 			}
 			else if(args.length > 0){
 				if(args[0].equalsIgnoreCase("check")){
@@ -423,7 +423,25 @@ public class main extends JavaPlugin implements CommandExecutor {
 					
 					String path = filePath.toString();
 					
+					URL rl;
+					try {
+						rl = new URL(url);
+					} catch (MalformedURLException e) {
+						sender.sendMessage(ChatColor.RED+"INVALID url");
+						return true;
+					}
 					
+					File f = new File(path);
+					if(!f.exists()){
+						sender.sendMessage(ChatColor.RED+"File Not Found!");
+					}
+					
+					if(!urlUpdater.registerNew(f, rl)){
+						sender.sendMessage(ChatColor.RED+"Failed to register!");
+						return true;
+					}
+					sender.sendMessage(ChatColor.GREEN+"URL Updateable registered!");
+					return true;
 				}
 			}
 		}

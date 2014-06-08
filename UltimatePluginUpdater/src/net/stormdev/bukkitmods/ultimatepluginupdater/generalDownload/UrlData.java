@@ -1,28 +1,47 @@
 package net.stormdev.bukkitmods.ultimatepluginupdater.generalDownload;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 
 import com.google.common.io.Files;
 
 public class UrlData {
 	public static byte[] getData(URL url){
-		File f;
+		ByteArrayOutputStream bais = new ByteArrayOutputStream();
+		InputStream is = null;
 		try {
-		  f = new File(url.toURI());
-		} catch(URISyntaxException e) {
-		  f = new File(url.getPath());
+		  is = url.openStream ();
+		  byte[] byteChunk = new byte[4096]; // Or whatever size you want to read in at a time.
+		  int n;
+
+		  while ( (n = is.read(byteChunk)) > 0 ) {
+		    bais.write(byteChunk, 0, n);
+		  }
 		}
-		return getData(f);
+		catch (IOException e) {
+		  System.err.printf ("Failed while reading bytes from %s: %s", url.toExternalForm(), e.getMessage());
+		  e.printStackTrace ();
+		  // Perform any other exception handling that's appropriate.
+		}
+		finally {
+		  if (is != null) { try {
+			is.close();
+		} catch (IOException e) {
+			return new byte[]{};
+		} }
+		}
+		return bais.toByteArray();
 	}
 	
 	public static byte[] getData(File f){
 		try {
 			return Files.toByteArray(f);
 		} catch (IOException e) {
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -40,6 +59,6 @@ public class UrlData {
 		if(!local.exists()){
 			return true;
 		}
-		return isEqual(url, local);
+		return !isEqual(url, local);
 	}
 }

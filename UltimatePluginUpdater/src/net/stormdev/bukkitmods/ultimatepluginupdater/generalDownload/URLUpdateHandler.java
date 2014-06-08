@@ -19,10 +19,13 @@ public class URLUpdateHandler {
 	private List<URLUpdateable> registered = new ArrayList<URLUpdateable>();
 	private static boolean runningUpdates = false;
 	private File saveFileFolder;
+	private boolean log;
 	
 	public URLUpdateHandler(){
+		log = main.config.getBoolean("general.updater.logChecks");
 		saveFileFolder = new File(main.plugin.getDataFolder()+File.separator+"mySoftware"+File.separator+"urlUpdates");
 		saveFileFolder.mkdirs();
+		load();
 	}
 	
 	public List<URLUpdateable> getAll(){
@@ -68,9 +71,10 @@ public class URLUpdateHandler {
 	}
 	
 	public void load(){
+		main.logger.info("Loading URL updates...");
 		File[] contents = saveFileFolder.listFiles();
 		for(File file:contents){
-			if(file.getName().toLowerCase().endsWith(".urlUpdateable")){
+			if(file.getName().toLowerCase().endsWith(".urlupdateable")){
 				Object obj = ObjectLoader.load(file);
 				try {
 					URLUpdateable updateable = (URLUpdateable) obj;
@@ -118,6 +122,7 @@ public class URLUpdateHandler {
 	}
 	
 	private synchronized void checkAll(){
+		main.logger.info("Starting URL update checks...");
 		for(URLUpdateable updat:registered){
 			check(updat);
 		}
@@ -132,6 +137,9 @@ public class URLUpdateHandler {
 		} catch (MalformedURLException e) {
 			main.logger.info("Error in updateable, malformed URL: "+remote);
 			return;
+		}
+		if(log){
+			main.logger.info(update.getRemoteURL()+" needs update: "+toUpdate);
 		}
 		if(toUpdate){
 			String jarname = null;
